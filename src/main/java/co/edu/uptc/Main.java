@@ -1,7 +1,10 @@
 package co.edu.uptc;
 
+import co.edu.uptc.presenters.Runner;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        Runner runner = new Runner();
+        runner.run();
     }
 }
