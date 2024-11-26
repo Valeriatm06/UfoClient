@@ -2,8 +2,10 @@ package co.edu.uptc.presenters;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import co.edu.uptc.interfaces.UfoInterface;
+import co.edu.uptc.pojos.Ufo;
 import lombok.Getter;
 
 @Getter
@@ -23,18 +25,23 @@ public class MainPresenter implements UfoInterface.Presenter{
     }
 
     @Override
-    public String getIP() {
-        return view.getIP();
-    }
-
-    @Override
-    public int getPort() {
-        return view.getPort();
-    }
-
-    @Override
     public void startConnection(String ip, int port, String userName) throws UnknownHostException, IOException {
         model.startConnection(ip, port, userName);
+    }
+
+    @Override
+    public void sendUfoCount(int ufoCount) {
+        model.sendUfoCount(ufoCount);
+    }
+
+    @Override
+    public void sendSpeed(int speed) {
+        model.sendDefaultSpeed(speed);
+    }
+
+    @Override
+    public void sendAppearanceTime(int appearanceTime) {
+        model.sendAppearanceTime(appearanceTime);
     }
 
     // @Override
@@ -42,40 +49,40 @@ public class MainPresenter implements UfoInterface.Presenter{
     //     return view.areaSize();
     // }
 
-    // @Override
-    // public void startGame(int ufoNumber, double speed, int appearance) {
-    //    model.startGame(ufoNumber, speed, appearance);
-    // }
+    @Override
+    public void startGame() {
+       model.startGame();
+    }
 
-    // @Override
-    // public boolean isRunning() {
-    //     return model.isRunning();
-    // }
+    @Override
+    public boolean isRunning() {
+        return model.isRunning();
+    }
 
-    // @Override
-    // public List<Ufo> getUfos() {
-    //    return model.getUfosList();
-    // }
+    @Override
+    public List<Ufo> getUfos() {
+       return model.getUfosList();
+    }
 
-    // @Override
-    // public void updateUfos(List<Ufo> ufos) {
-    //     view.updateUfoDisplay(ufos);
-    // }
+    @Override
+    public void updateUfos(List<Ufo> ufos) {
+        view.updateUfoDisplay(ufos);
+    }
 
-    // @Override
-    // public void updateScore(int crashedCount) {
-    //     view.updateScoreDisplay(crashedCount);
-    // }
+    @Override
+    public void updateScore(int crashedCount) {
+        view.updateScoreDisplay(crashedCount);
+    }
 
-    // @Override
-    // public void updateArrival(int arrivedCount) {
-    //     view.updateArrivalDisplay(arrivedCount);
-    // }
+    @Override
+    public void updateArrival(int arrivedCount) {
+        view.updateArrivalDisplay(arrivedCount);
+    }
 
-    // @Override
-    // public void countMovingUfos(int movingNumber) {
-    //    view.updateMovingCount(movingNumber);
-    // }
+    @Override
+    public void countMovingUfos(int movingNumber) {
+       view.updateMovingCount(movingNumber);
+    }
 
     // @Override
     // public int[] destinationAreaSize() {
@@ -94,16 +101,32 @@ public class MainPresenter implements UfoInterface.Presenter{
     //         view.refresh(); 
     //     }
     // }
-    
-    // @Override
-    // public Ufo selectUfoAtPosition(int x, int y) {
-    //     return model.selectUfoAtPosition(x, y);
-    // }
 
-    // @Override
-    // public void changeSelectedUfoSpeed(int delta) {
-    //     model.changeSelectedUfoSpeed(delta);
-    // }
+    @Override
+    public void sendSelectedUfoSpeed(int delta) {
+        model.sendSelectedUfoSpeed(delta);
+    }
+
+    @Override
+    public void changeSelectedUfoSpeed() {
+        model.changeSelectedUfoSpeed();;
+    }
+
+    @Override
+    public void sendXPosition(int x) {
+        model.sendXPosition(x);
+    }
+
+    @Override
+    public void sendYPosition(int y) {
+        model.sendYPosition(y);
+    }
+
+    @Override
+    public Ufo selectUfoAtPosition() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'selectUfoAtPosition'");
+    }
 
     // @Override
     // public void addTrajectoryPointToUfo(Ufo ufo, Point point) {

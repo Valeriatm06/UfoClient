@@ -13,15 +13,27 @@ public interface UfoInterface {
 
        public void startConnection(String ip, int port, String userName) throws UnknownHostException, IOException;
 
-        // public void startGame(int ufoNumber, double speed, int appearance);
+       public void sendUfoCount(int ufoCount);
 
-        // public boolean isRunning();
+        public void sendDefaultSpeed(int speed);
 
-        // public List<Ufo> getUfosList();
+        public void sendAppearanceTime(int appearanceTime);
 
-        // public Ufo selectUfoAtPosition(int x, int y);
+        public void startGame();
 
-        // public void changeSelectedUfoSpeed(int delta);
+        public boolean isRunning();
+
+        public List<Ufo> getUfosList();
+
+        public void sendXPosition(int x);
+
+        public void sendYPosition(int y);
+
+        public Ufo selectUfoAtPosition();
+
+        public void sendSelectedUfoSpeed(int delta);
+
+        public void changeSelectedUfoSpeed();
 
         // public Ufo getSelectedUfo();
 
@@ -40,31 +52,43 @@ public interface UfoInterface {
 
         public void startConnection(String ip, int port, String userName) throws UnknownHostException, IOException;
 
+        public void sendUfoCount(int ufoCount);
+
+        public void sendSpeed(int speed);
+
+        public void sendAppearanceTime(int appearanceTime);
+
         // public int[] areaSize();
 
         // public int[] destinationAreaSize();
 
         // public int[] ufoSize();
 
-        // public void startGame(int ufoNumber, double speed,int appearance);
+        public void startGame();
 
-        // public boolean isRunning();
+        public boolean isRunning();
 
-        // public List<Ufo> getUfos();
+        public List<Ufo> getUfos();
 
-        // public void updateUfos(List<Ufo> ufos);
+        public void updateUfos(List<Ufo> ufos);
 
-        // public void updateScore(int crashedUfoCount);
+        public void updateScore(int crashedUfoCount);
 
-        // public void updateArrival(int arrivedCount);
+        public void updateArrival(int arrivedCount);
 
-        // public void countMovingUfos(int movingCount);
+        public void countMovingUfos(int movingCount);
 
         // public void updateSpeed(double newSpeed);
 
-        // public Ufo selectUfoAtPosition(int x, int y);
+        public void sendXPosition(int x);
 
-        // public void changeSelectedUfoSpeed(int delta);
+        public void sendYPosition(int y);
+
+        public Ufo selectUfoAtPosition();
+
+        public void sendSelectedUfoSpeed(int delta);
+
+        public void changeSelectedUfoSpeed();
 
         // public void addTrajectoryPointToUfo(Ufo ufo, Point point);
 
@@ -73,10 +97,6 @@ public interface UfoInterface {
         // public boolean allUfosStopped();
 
         // public int getUfoNumber();
-
-        public String getIP();
-
-        public int getPort();
     }
 
     public interface View {
@@ -84,9 +104,7 @@ public interface UfoInterface {
 
         public void begin();
 
-        public String getIP();
-
-        public int getPort();
+        public void sendMessage();
 
         // public int[] areaSize();
 
@@ -94,15 +112,15 @@ public interface UfoInterface {
 
         // public int[] ufoSize();
 
-        // public void updateUfoDisplay(List<Ufo> ufos);
+        public void updateUfoDisplay(List<Ufo> ufos);
 
-        // public void updateScoreDisplay(int crashedCount);
+        public void updateScoreDisplay(int crashedCount);
 
-        // public void updateArrivalDisplay(int arrivedCount);
+        public void updateArrivalDisplay(int arrivedCount);
 
-        // public void updateMovingCount(int crashedCount);
+        public void updateMovingCount(int crashedCount);
 
-        // public void refresh();
+        public void refresh();
 
         // public int getUfoNumber();
 

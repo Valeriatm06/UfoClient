@@ -24,9 +24,11 @@ public class OptionsDialog extends JDialog {
     private int selectedAppearanceTime;
     private int selectedSpeed; 
     private int selectedUfoType; 
+    private UfoMainView ufoMainView;
 
-    public OptionsDialog(Frame owner, int ufoCount, int appearanceTime, int speed, int ufoType) {
+    public OptionsDialog(UfoMainView owner, int ufoCount, int appearanceTime, int speed, int ufoType) {
         super(owner, "Opciones", true);
+        ufoMainView = owner;
         propertiesService = new PropertiesService();
         setSize(500, 400);
         setLocationRelativeTo(owner);
@@ -187,6 +189,9 @@ public class OptionsDialog extends JDialog {
         selectedAppearanceTime = getAppearanceTime();
         selectedSpeed = getSpeed();
         selectedUfoType = getSelectedUfoType();
+        ufoMainView.getPresenter().sendUfoCount(selectedUfoCount);
+        ufoMainView.getPresenter().sendSpeed(selectedSpeed);
+        ufoMainView.getPresenter().sendAppearanceTime(selectedAppearanceTime);
     }
 
     public int getUfoCount() {

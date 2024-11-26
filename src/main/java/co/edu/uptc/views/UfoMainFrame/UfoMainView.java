@@ -38,7 +38,7 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
         initFrame();
         initClientPanel();
         initMainPanel();
-        // initGamePanel();
+        initGamePanel();
         buttonsEvent();
     }
 
@@ -61,7 +61,7 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setResizable(true);
         setLocationRelativeTo(null);
-        musicPlayer.playMusic(propertiesService.getKeyValue("songPath"));
+        // musicPlayer.playMusic(propertiesService.getKeyValue("songPath"));
     }
 
     public void initClientPanel(){
@@ -76,7 +76,7 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
     }
     
     public void initGamePanel(){
-        // gamePanel = new GamePanel(this);
+        gamePanel = new GamePanel(this);
         add(gamePanel, "GamePanel"); 
         gamePanel.setVisible(false); 
     }
@@ -96,7 +96,7 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
     private void startGameFromMainPanel() {
         switchToGamePanel();
         updateOptionsFromDialog();
-        // startGame();
+        startGame();
     }
     
     private void switchToGamePanel() {
@@ -124,15 +124,24 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
         appearanceTime = optionsDialog.getAppearanceTime();
         speed = optionsDialog.getSpeed();
         ufoType = optionsDialog.getSelectedUfoType();
-        // gamePanel.updateufoType(ufoType);
-        // gamePanel.getInfoArea().updateufoType(ufoType);
+
+        gamePanel.updateufoType(ufoType);
+        gamePanel.getInfoArea().updateufoType(ufoType);
     }
 
-    // public void startGame() {
-    //     resetCountersInView();
-    //     gamePanel.setVisible(true);
-    //     gamePanel.startUfoGame(ufoCount, speed, appearanceTime);
-    // }
+    @Override
+    public void sendMessage(){
+        presenter.sendUfoCount(ufoCount);
+        presenter.sendSpeed(speed);
+        presenter.sendAppearanceTime(appearanceTime);
+    }
+
+
+    public void startGame() {
+        resetCountersInView();
+        gamePanel.setVisible(true);
+        gamePanel.startUfoGame();
+    }
     
 //     private void checkGameFinished() {
 //     if (presenter.allUfosStopped() && (gameFinishedDialog == null || !gameFinishedDialog.isVisible())) {
@@ -172,52 +181,41 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
     private void restartGame() {
         switchToGamePanel();
         this.gameFinishedDialog.dispose();
-        // startGame();
+        startGame();
     }
     
     
-    // public void resetCountersInView() {
-    //     gamePanel.getInfoArea().updatCrashedUfoCount(0);  
-    //     gamePanel.getInfoArea().upDateArrivalUfoCount(0); 
-    //     gamePanel.getInfoArea().upDateMovingUfoCount(0);
-    // }
-
-    @Override
-    public String getIP(){
-        return initClientPanel.getIpTextField().getText();
+    public void resetCountersInView() {
+        gamePanel.getInfoArea().updatCrashedUfoCount(0);  
+        gamePanel.getInfoArea().upDateArrivalUfoCount(0); 
+        gamePanel.getInfoArea().upDateMovingUfoCount(0);
     }
 
-    @Override
-    public int getPort() {
-        return Integer.parseInt(initClientPanel.getPortTextField().getText());
-    }
-
-    
     // @Override
     // public int getUfoNumber(){
     //     return optionsDialog.getUfoCount();
     // }
 
-    // @Override
-    // public void updateUfoDisplay(List<Ufo> ufos) {
-    //     gamePanel.updateUfos(ufos);
-    //     checkGameFinished();
-    // }
+    @Override
+    public void updateUfoDisplay(List<Ufo> ufos) {
+        gamePanel.updateUfos(ufos);
+        // checkGameFinished();
+    }
 
-    // @Override
-    // public void updateScoreDisplay(int crashedCount) {
-    //     gamePanel.getInfoArea().updatCrashedUfoCount(crashedCount);
-    // }
+    @Override
+    public void updateScoreDisplay(int crashedCount) {
+        gamePanel.getInfoArea().updatCrashedUfoCount(crashedCount);
+    }
 
-    // @Override
-    // public void updateMovingCount(int movingCount) {
-    //     gamePanel.getInfoArea().upDateMovingUfoCount(movingCount);
-    // }
+    @Override
+    public void updateMovingCount(int movingCount) {
+        gamePanel.getInfoArea().upDateMovingUfoCount(movingCount);
+    }
 
-    // @Override
-    // public void updateArrivalDisplay(int arrivedCount) {
-    //     gamePanel.getInfoArea().upDateArrivalUfoCount(arrivedCount);
-    // }
+    @Override
+    public void updateArrivalDisplay(int arrivedCount) {
+        gamePanel.getInfoArea().upDateArrivalUfoCount(arrivedCount);
+    }
 
 
     @Override
@@ -225,10 +223,10 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
        this.presenter = presenter;
     }
 
-    // @Override
-    // public void refresh() {
-    //     gamePanel.getUfoAreaPanel().repaint();
-    // }
+    @Override
+    public void refresh() {
+        gamePanel.getUfoAreaPanel().repaint();
+    }
 
 
     // @Override

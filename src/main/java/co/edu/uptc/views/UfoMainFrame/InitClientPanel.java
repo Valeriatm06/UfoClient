@@ -139,6 +139,7 @@ public class InitClientPanel extends JPanel {
                 try {
                     ufoMainView.getPresenter().startConnection(ipTextField.getText(),Integer.parseInt(portTextField.getText()),usernameTextField.getText());
                     ufoMainView.switchToMainPanel();
+                    ufoMainView.sendMessage();
                 } catch (Exception e1) {
                     showErrorDialog("Error al conectar: Verifique los campos");
                 }
