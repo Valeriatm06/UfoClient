@@ -28,6 +28,7 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
     private int appearanceTime;
     private int speed;
     private int ufoType;
+    private int movingCount;
 
     public UfoMainView(){   
         propertiesService = new PropertiesService();
@@ -143,21 +144,21 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
         gamePanel.startUfoGame();
     }
     
-//     private void checkGameFinished() {
-//     if (presenter.allUfosStopped() && (gameFinishedDialog == null || !gameFinishedDialog.isVisible())) {
-//         new SwingWorker<Void, Void>() {
-//             @Override
-//             protected Void doInBackground() throws Exception {
-//                 Thread.sleep(500); 
-//                 return null;
-//             }
-//             @Override
-//             protected void done() {
-//                 showGameFinishedDialog();
-//             }
-//         }.execute();
-//     }
-// }
+    private void checkGameFinished() {
+    if (presenter.allUfosStopped() && (gameFinishedDialog == null || !gameFinishedDialog.isVisible())) {
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                Thread.sleep(500); 
+                return null;
+            }
+            @Override
+            protected void done() {
+                showGameFinishedDialog();
+            }
+        }.execute();
+    }
+}
 
     private void showGameFinishedDialog() {
         if (gameFinishedDialog == null || !gameFinishedDialog.isVisible()) {
@@ -199,7 +200,7 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
     @Override
     public void updateUfoDisplay(List<Ufo> ufos) {
         gamePanel.updateUfos(ufos);
-        // checkGameFinished();
+        checkGameFinished();
     }
 
     @Override
@@ -210,6 +211,7 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
     @Override
     public void updateMovingCount(int movingCount) {
         gamePanel.getInfoArea().upDateMovingUfoCount(movingCount);
+        this.movingCount = movingCount;
     }
 
     @Override

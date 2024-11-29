@@ -13,6 +13,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -45,7 +46,7 @@ public class UfoAreaPanel extends JPanel {
         setOpaque(false); 
         setLayout(null);
         loadArrivalAreaImage();
-        // initMouseListener();
+        initMouseListener();
         initKeyListener();
         setFocusable(true); 
         requestFocusInWindow();
@@ -53,9 +54,14 @@ public class UfoAreaPanel extends JPanel {
     }
 
     public void setUfos(List<Ufo> ufos) {
+        if (ufos == null) {
+            System.out.println("La lista de OVNIS es null");
+        } else if (ufos.isEmpty()) {
+        }
         this.ufos = ufos;
         repaint();
     }
+    
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -73,7 +79,7 @@ public class UfoAreaPanel extends JPanel {
             for (Ufo ufo : ufos) {
                 drawUfo(g, ufo);
                 if (ufo == selectedUfo) {
-                    highlightSelectedUfo(g, ufo);
+                    highlightSelectedUfo(g, selectedUfo);
                 }
                 if (gamePanel.getInfoArea().isTrajectoryVisible()) {
                     drawTrajectory(g, ufo);
@@ -95,6 +101,7 @@ public class UfoAreaPanel extends JPanel {
 
     private void drawTrajectory(Graphics g, Ufo ufo) {
         List<Point> trajectory = ufo.getTrajectory();
+        System.out.println("TRAYECTORIA " + trajectory);
         if (trajectory != null && !trajectory.isEmpty()) {
             g.setColor(GlobalView.TITLE_TEXT);
             for (int i = 0; i < trajectory.size() - 1; i++) {
@@ -111,64 +118,65 @@ public class UfoAreaPanel extends JPanel {
         arrivalAreaImage = new ImageIcon(propertiesService.getKeyValue("balckHoLePath")).getImage();
     }
 
-    // private void initMouseListener() {
-    //     addMouseListener(createMouseListener());
-    //     addMouseMotionListener(createMouseMotionListener());
-    // }
+    private void initMouseListener() {
+        addMouseListener(createMouseListener());
+        addMouseMotionListener(createMouseMotionListener());
+    }
     
-    // private MouseListener createMouseListener() {
-    //     return new MouseAdapter() {
-    //         @Override
-    //         public void mousePressed(MouseEvent e) {
-    //             handleMousePressed(e);
-    //         }
+    private MouseListener createMouseListener() {
+        return new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                handleMousePressed(e);
+            }
     
-    //         @Override
-    //         public void mouseReleased(MouseEvent e) {
-    //             handleMouseReleased(e);
-    //         }
-    //     };
-    // }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                handleMouseReleased(e);
+            }
+        };
+    }
     
-    // private MouseMotionListener createMouseMotionListener() {
-    //     return new MouseMotionAdapter() {
-    //         @Override
-    //         public void mouseDragged(MouseEvent e) {
-    //             handleMouseDragged(e);
-    //         }
-    //     };
-    // }
+    private MouseMotionListener createMouseMotionListener() {
+        return new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                handleMouseDragged(e);
+            }
+        };
+    }
     
     
-    // private void handleMousePressed(MouseEvent e) {
-    //     Ufo clickedUfo = selectUfoAtPosition(e.getX(), e.getY());
-    //     if (clickedUfo != null) {
-    //         toggleSelectedUfo(clickedUfo);
-    //     }
-    //     requestFocusInWindow();
-    //     repaint();
-    // }
+    private void handleMousePressed(MouseEvent e) {
+        Ufo clickedUfo = selectUfoAtPosition(e.getX(), e.getY());
+        if (clickedUfo != null) {
+            toggleSelectedUfo(clickedUfo);
+        }
+        requestFocusInWindow();
+        repaint();
+    }
     
-    // private void handleMouseReleased(MouseEvent e) {
-    //     if (selectedUfo != null && !selectedUfo.getTrajectory().isEmpty()) {
-    //         gamePanel.getUfoMainView().getPresenter().startUfoMovement(selectedUfo);
-    //     }
-    //     repaint();
-    // }
+    private void handleMouseReleased(MouseEvent e) {
+        if (selectedUfo != null && !selectedUfo.getTrajectory().isEmpty()) {
+            gamePanel.getUfoMainView().getPresenter().sendSelectedUfo(selectedUfo);
+            gamePanel.getUfoMainView().getPresenter().startUfoMovement();
+        }
+        repaint();
+    }
     
-    // private void handleMouseDragged(MouseEvent e) {
-    //     if (selectedUfo != null) {
-    //         addTrajectoryPoint(e.getPoint());
-    //         repaint();
-    //     }
-    // }
+    private void handleMouseDragged(MouseEvent e) {
+        if (selectedUfo != null) {
+            addTrajectoryPoint(e.getPoint());
+            repaint();
+        }
+    }
     
-    // private void toggleSelectedUfo(Ufo clickedUfo) {
-    //     if (selectedUfo == clickedUfo) {
-    //         return;
-    //     }
-    //     selectedUfo = clickedUfo;
-    // }
+    private void toggleSelectedUfo(Ufo clickedUfo) {
+        if (selectedUfo == clickedUfo) {
+            return;
+        }
+        selectedUfo = clickedUfo;
+    }
     
     
     public Ufo selectUfoAtPosition(int x, int y) {
@@ -184,10 +192,15 @@ public class UfoAreaPanel extends JPanel {
     
 
     private void addTrajectoryPoint(Point point) {
-        if (selectedUfo != null && point != null) {
-            selectedUfo.getTrajectory().add(point); 
+    if (selectedUfo != null && point != null) {
+        if (selectedUfo.getTrajectory() == null) {
+            selectedUfo.setTrajectory(new ArrayList<>());  
         }
+        selectedUfo.getTrajectory().add(point);  
+    } else {
+        System.out.println("No se puede añadir un punto nulo a la trayectoria.");
     }
+}
 
     public void initKeyListener() {
         addKeyListener(new KeyAdapter() {

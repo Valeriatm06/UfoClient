@@ -124,8 +124,7 @@ public class MainPresenter implements UfoInterface.Presenter{
 
     @Override
     public Ufo selectUfoAtPosition() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'selectUfoAtPosition'");
+        return model.selectUfoAtPosition();
     }
 
     // @Override
@@ -133,15 +132,25 @@ public class MainPresenter implements UfoInterface.Presenter{
     //         model.addTrajectoryPointToSelectedUfo(point);;
     // }
 
-    // @Override
-    // public void startUfoMovement(Ufo ufo) {
-    //     model.startUfoMovement(ufo);
-    // }
+    @Override
+    public void startUfoMovement() {
+        model.startUfoMovement();
+    }
 
-    // @Override
-    // public boolean allUfosStopped() {
-    //     return model.allUfosStopped();
-    // }
+    @Override
+    public void sendSelectedUfo(Ufo selectedUfo) {
+        model.sendSelectedUfo(selectedUfo);
+    }
+
+    @Override
+    public boolean allUfosStopped() {
+       return model.allUfosStopped();
+    }
+
+    @Override
+    public boolean isFirstClient() {
+        return model.isFirstClient();
+    }
 
     // @Override
     // public int getUfoNumber() {

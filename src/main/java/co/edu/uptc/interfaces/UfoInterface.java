@@ -1,6 +1,4 @@
 package co.edu.uptc.interfaces;
-
-import java.awt.Point;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -35,13 +33,17 @@ public interface UfoInterface {
 
         public void changeSelectedUfoSpeed();
 
+        public boolean isFirstClient();
+
         // public Ufo getSelectedUfo();
 
         // public void addTrajectoryPointToSelectedUfo(Point point);
 
-        // public void startUfoMovement(Ufo ufo);
+        public void sendSelectedUfo(Ufo selectedUfo);
 
-        // public boolean allUfosStopped();
+        public void startUfoMovement();
+
+        public boolean allUfosStopped();
 
     }
 
@@ -57,6 +59,8 @@ public interface UfoInterface {
         public void sendSpeed(int speed);
 
         public void sendAppearanceTime(int appearanceTime);
+
+        public boolean isFirstClient();
 
         // public int[] areaSize();
 
@@ -92,9 +96,11 @@ public interface UfoInterface {
 
         // public void addTrajectoryPointToUfo(Ufo ufo, Point point);
 
-        // public void startUfoMovement(Ufo ufo);
+        public void sendSelectedUfo(Ufo selectedUfo);
 
-        // public boolean allUfosStopped();
+        public void startUfoMovement();
+
+        public boolean allUfosStopped();
 
         // public int getUfoNumber();
     }

@@ -4,7 +4,7 @@ import co.edu.uptc.interfaces.UfoInterface;
 import co.edu.uptc.pojos.Ufo;
 import co.edu.uptc.utilities.PointAdapter;
 
-import com.google.gson.Gson;  // Importamos Gson para trabajar con JSON
+import com.google.gson.Gson;  
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -22,10 +22,10 @@ public class UfoClient implements UfoInterface.Model {
     private DataOutputStream writer;
     private DataInputStream reader;
     private boolean isRunning;
-    
-    // Atributo para almacenar la lista de UFOs recibida
+    private boolean allUfoStopped;
+    private Ufo ufoAtPosition;
     private List<Ufo> ufoList;
-    private List<Ufo> upDatedUfoList;
+    private boolean isFirst;
 
     @Override
     public void setPresenter(UfoInterface.Presenter presenter) {
@@ -38,8 +38,6 @@ public class UfoClient implements UfoInterface.Model {
         client = new Socket(ip, port);
         writer = new DataOutputStream(client.getOutputStream());
         reader = new DataInputStream(client.getInputStream());
-
-        // Iniciar un hilo para escuchar los mensajes del servidor
         new Thread(new ServerMessageHandler(presenter, reader)).start();
     }
 
@@ -57,17 +55,17 @@ public class UfoClient implements UfoInterface.Model {
 
     @Override
     public void sendUfoCount(int ufoCount) {
-        sendMessage("UFO_COUNT " + ufoCount);  // Enviar el número de UFOs como mensaje
+        sendMessage("UFO_COUNT " + ufoCount);  
     }
 
     @Override
     public void sendDefaultSpeed(int speed) {
-        sendMessage("SPEED " + speed);  // Enviar la velocidad como mensaje
+        sendMessage("SPEED " + speed); 
     }
 
     @Override
     public void sendAppearanceTime(int appearanceTime) {
-        sendMessage("APPEARANCE_TIME " + appearanceTime);  // Enviar el tiempo de aparición como mensaje
+        sendMessage("APPEARANCE_TIME " + appearanceTime);  
     }
 
     @Override
@@ -78,6 +76,12 @@ public class UfoClient implements UfoInterface.Model {
     @Override
     public void changeSelectedUfoSpeed() {
         sendMessage("CHANGE_SELECTED_UFO_SPEED");
+    }
+
+    @Override
+    public boolean isFirstClient() {
+        sendMessage("IS_FIRST");
+        return isFirst;
     }
 
     @Override
@@ -92,20 +96,47 @@ public class UfoClient implements UfoInterface.Model {
 
     @Override
     public Ufo selectUfoAtPosition() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'selectUfoAtPosition'");
+       sendMessage("SEND_SELECTED_UFO");
+        return ufoAtPosition;
+    }
+
+    @Override
+public void sendSelectedUfo(Ufo selectedUfo) {
+    try {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter()); 
+        Gson gson = gsonBuilder.create();
+
+        String ufoJson = gson.toJson(selectedUfo);
+
+        sendMessage("SELECTED_UFO " + ufoJson);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+
+    @Override
+    public void startUfoMovement() {
+        sendMessage("START_UFO_MOVEMENT");
     }
 
     @Override
     public boolean isRunning() {
         sendMessage("SEND_RUNNING_STATE");
-        return isRunning; // Retornar el estado de isRunning
+        return isRunning; 
+    }
+
+    @Override
+    public boolean allUfosStopped() {
+        sendMessage("SEND_UFOS_STOPPED");
+        return allUfoStopped;
     }
 
     @Override
     public List<Ufo> getUfosList() {
         sendMessage("SEND_UFOS");
-        return ufoList;  // Devolver la lista de UFOs almacenada
+        return ufoList;  
     }
 
     @Override
@@ -113,93 +144,109 @@ public class UfoClient implements UfoInterface.Model {
         sendMessage("START_GAME");
     }
 
-    // Método genérico para enviar mensajes al servidor
-    public void sendMessage(String msg) {
+    public synchronized void sendMessage(String msg) {
         try {
-            writer.writeUTF(msg);  // Enviar el mensaje como cadena UTF-8
-            writer.flush();  // Asegurarse de que los datos se envíen inmediatamente
+            writer.writeUTF(msg);
+            writer.flush(); 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Método para recibir la lista de UFOs en formato JSON
+    public void receiveSingleUfo(String jsonUfo) {
+        try {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter());
+            Gson gson = gsonBuilder.create();
+        
+            System.out.println("JSON recibido para UFO: " + jsonUfo);
+        
+            Ufo ufo = gson.fromJson(jsonUfo, Ufo.class);
+        
+            ufoAtPosition = ufo;
+        
+            System.out.println("Recibido UFO en posición: " + ufoAtPosition.getPosition());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
    public void receiveUfoList(String jsonUfoList) {
         try {
-            // Creamos el objeto Gson con el adaptador registrado
             GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter());  // Registra el adaptador para Point
+            gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter());  
             Gson gson = gsonBuilder.create();
 
-            // Usamos TypeToken para deserializar una lista de objetos Ufo
             Type listType = new TypeToken<List<Ufo>>() {}.getType();
             ufoList = gson.fromJson(jsonUfoList, listType);
-
-            // Procesamos la lista de UFOs recibida
-            processUfoList(ufoList);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void processUfoList(List<Ufo> ufoList) {
-        // Lógica para procesar la lista de UFOs
-        for (Ufo ufo : ufoList) {
-            System.out.println("UFO en posición: " + ufo.getPosition());
-        }
-    }
-
-    // Método para recibir mensajes del servidor
-    private String receiveMessage() {
-        try {
-            return reader.readUTF();  // Leer el mensaje como cadena de texto
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // Clase interna que maneja los mensajes del servidor
     private class ServerMessageHandler implements Runnable {
 
         private UfoInterface.Presenter presenter;
         private DataInputStream reader;
-
+    
         public ServerMessageHandler(UfoInterface.Presenter presenter, DataInputStream reader) {
             this.presenter = presenter;
             this.reader = reader;
         }
-
+    
         @Override
         public void run() {
             try {
                 String serverMessage;
                 while ((serverMessage = reader.readUTF()) != null) {
-                    System.out.println("Mensaje del servidor: " + serverMessage);
-
-                    // Procesar los mensajes del servidor
+                    // System.out.println("Mensaje del servidor: " + serverMessage);
+                    
                     if (serverMessage.startsWith("UFOS_LIST")) {
-                        // Extraemos la lista de UFOs en formato JSON que sigue a "UFOS_LIST"
                         String jsonUfoList = serverMessage.substring("UFOS_LIST".length()).trim();
                         receiveUfoList(jsonUfoList);
-                        presenter.updateUfos(upDatedUfoList);
                     } else if (serverMessage.startsWith("UP_DATE_UFOS")) {
                         String jsonUpdateList = serverMessage.substring("UP_DATE_UFOS".length()).trim();
                         receiveUfoList(jsonUpdateList);
-                    }else if (serverMessage.startsWith("UFO_CRASHED_COUNT")) {
-                        int crashedCount = Integer.parseInt(serverMessage.split(" ")[1]);
-                        presenter.updateScore(crashedCount); // Notificar al presenter del número de UFOs estrellados
+                        presenter.updateUfos(ufoList);
+                    } else if (serverMessage.startsWith("SINGLE_UFO")) {
+                        String jsonUfo = serverMessage.substring("SINGLE_UFO".length()).trim();
+                        receiveSingleUfo(jsonUfo);
+                    } else if (serverMessage.startsWith("UFO_CRASHED_COUNT")) {
+                        try {
+                            int crashedCount = Integer.parseInt(serverMessage.split(" ")[1]);
+                            presenter.updateScore(crashedCount);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Error al parsear el contador de UFOs estrellados: " + serverMessage.split(" ")[1]);
+                            e.printStackTrace();
+                        }
                     } else if (serverMessage.startsWith("UFO_ARRIVAL_COUNT")) {
-                        int arrivedCount = Integer.parseInt(serverMessage.split(" ")[1]);
-                        presenter.updateArrival(arrivedCount); // Notificar al presenter del número de UFOs que han llegado
+                        String[] parts = serverMessage.split(" ");
+                        if (parts.length > 1 && !parts[1].isEmpty()) {
+                            try {
+                                int arrivedCount = Integer.parseInt(parts[1]);
+                                presenter.updateArrival(arrivedCount);
+                            } catch (NumberFormatException e) {
+                                System.err.println("Error al parsear el contador de UFOs llegados: " + parts[1]);
+                                e.printStackTrace();
+                            }
+                        } else {
+                            System.err.println("Mensaje mal formado para UFO_ARRIVAL_COUNT: " + serverMessage);
+                        }
                     } else if (serverMessage.startsWith("UFO_MOVING_COUNT")) {
                         int movingCount = Integer.parseInt(serverMessage.split(" ")[1]);
-                        presenter.countMovingUfos(movingCount); // Notificar al presenter del número de UFOs en movimiento
-                    } else if (serverMessage.startsWith("UFO_RUNNING")) {
-                        // Extraer la parte del mensaje que contiene el valor booleano
-                        String booleanValue = serverMessage.split(" ")[1]; // El segundo valor sería "true" o "false"
+                        presenter.countMovingUfos(movingCount);
+                    } else if (serverMessage.startsWith("FIRST_CLIENT")) {
+                        String booleanValue = serverMessage.split(" ")[1];
+                        boolean isFirst = Boolean.parseBoolean(booleanValue);
+                        UfoClient.this.isFirst = isFirst;
+                    }else if (serverMessage.startsWith("UFO_RUNNING")) {
+                        String booleanValue = serverMessage.split(" ")[1];
                         boolean isRunning = Boolean.parseBoolean(booleanValue);
                         UfoClient.this.isRunning = isRunning;
+                    } else if (serverMessage.startsWith("UFO_STOPPED")) {
+                        String booleanValue = serverMessage.split(" ")[1];
+                        boolean isStopped = Boolean.parseBoolean(booleanValue);
+                        UfoClient.this.allUfoStopped = isStopped; 
                     } else {
                         System.out.println("Comando desconocido: " + serverMessage);
                     }
@@ -209,6 +256,7 @@ public class UfoClient implements UfoInterface.Model {
             }
         }
     }
+    
 
 }
 
