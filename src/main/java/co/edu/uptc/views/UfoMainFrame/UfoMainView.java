@@ -132,6 +132,9 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
 
     @Override
     public void sendMessage(){
+        // if(!presenter.isFirstClient()){
+        //     mainPanel.getOptionsButton().setVisible(false);
+        // }
         presenter.sendUfoCount(ufoCount);
         presenter.sendSpeed(speed);
         presenter.sendAppearanceTime(appearanceTime);

@@ -1,4 +1,5 @@
 package co.edu.uptc.interfaces;
+import java.awt.Point;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -44,6 +45,8 @@ public interface UfoInterface {
         public void startUfoMovement();
 
         public boolean allUfosStopped();
+
+        public void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory);
 
     }
 
@@ -97,6 +100,8 @@ public interface UfoInterface {
         // public void addTrajectoryPointToUfo(Ufo ufo, Point point);
 
         public void sendSelectedUfo(Ufo selectedUfo);
+
+        public void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory);
 
         public void startUfoMovement();
 

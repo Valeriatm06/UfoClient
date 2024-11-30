@@ -37,12 +37,14 @@ public class UfoAreaPanel extends JPanel {
     private List<Ufo> ufos;
     private Image arrivalAreaImage; 
     private Ufo selectedUfo;
+    private List<Point> selectedUfoTrayectory;
 
     public UfoAreaPanel(Image ufo, GamePanel gamePanel) {
         this.gamePanel = gamePanel;
         propertiesService = new PropertiesService();
         this.ufoImage = ufo;
         selectedUfo = null;
+        selectedUfoTrayectory = new ArrayList<>();
         setOpaque(false); 
         setLayout(null);
         loadArrivalAreaImage();
@@ -101,7 +103,7 @@ public class UfoAreaPanel extends JPanel {
 
     private void drawTrajectory(Graphics g, Ufo ufo) {
         List<Point> trajectory = ufo.getTrajectory();
-        System.out.println("TRAYECTORIA " + trajectory);
+        System.out.println("TRAYECTORIA " + selectedUfoTrayectory);
         if (trajectory != null && !trajectory.isEmpty()) {
             g.setColor(GlobalView.TITLE_TEXT);
             for (int i = 0; i < trajectory.size() - 1; i++) {
@@ -194,9 +196,11 @@ public class UfoAreaPanel extends JPanel {
     private void addTrajectoryPoint(Point point) {
     if (selectedUfo != null && point != null) {
         if (selectedUfo.getTrajectory() == null) {
-            selectedUfo.setTrajectory(new ArrayList<>());  
+            selectedUfo.setTrajectory(selectedUfoTrayectory);  
         }
-        selectedUfo.getTrajectory().add(point);  
+        selectedUfo.getTrajectory().add(point); 
+        selectedUfoTrayectory.add(point);
+        gamePanel.getUfoMainView().getPresenter().sendSelectedUfoTrayectory(selectedUfoTrayectory);
     } else {
         System.out.println("No se puede añadir un punto nulo a la trayectoria.");
     }

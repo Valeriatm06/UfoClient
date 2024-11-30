@@ -1,5 +1,6 @@
 package co.edu.uptc.presenters;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -150,6 +151,11 @@ public class MainPresenter implements UfoInterface.Presenter{
     @Override
     public boolean isFirstClient() {
         return model.isFirstClient();
+    }
+
+    @Override
+    public void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory) {
+        model.sendSelectedUfoTrayectory(selectedUfoTrayectory);
     }
 
     // @Override

@@ -115,6 +115,31 @@ public void sendSelectedUfo(Ufo selectedUfo) {
     }
 }
 
+    @Override
+public synchronized void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory) {
+    try {
+        // Crear el objeto Gson y el adaptador para Point
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        // gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter()); 
+        Gson gson = gsonBuilder.create();
+
+        // Convertir la lista de trayectorias en una cadena JSON
+        String jsonTrayectory = gson.toJson(selectedUfoTrayectory);
+        
+        // Agregar la etiqueta "SELECTED_UFO_TRAYECTORY" y enviar el mensaje
+        String message = "SELECTED_UFO_TRAYECTORY " + jsonTrayectory;
+        
+        // Depuración: Imprimir el mensaje para asegurarnos de que se está enviando correctamente
+        System.out.println("Enviando mensaje al servidor: " + message);
+        
+        sendMessage("TRAYECTORY " + jsonTrayectory);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+    
+
 
     @Override
     public void startUfoMovement() {
@@ -236,15 +261,23 @@ public void sendSelectedUfo(Ufo selectedUfo) {
                         int movingCount = Integer.parseInt(serverMessage.split(" ")[1]);
                         presenter.countMovingUfos(movingCount);
                     } else if (serverMessage.startsWith("FIRST_CLIENT")) {
-                        String booleanValue = serverMessage.split(" ")[1];
-                        boolean isFirst = Boolean.parseBoolean(booleanValue);
-                        UfoClient.this.isFirst = isFirst;
+                        String[] parts = serverMessage.split(" ");
+                        if (parts.length > 1) {
+                            String booleanValue = parts[1];
+                            System.out.println("Valor recibido para FIRST CLIENT: " + booleanValue);
+                            boolean isFirst = Boolean.parseBoolean(booleanValue);
+                            UfoClient.this.isFirst = isFirst;
+                        } else {
+                            System.err.println("Mensaje mal formado para UFO_RUNNING: " + serverMessage);
+                        }
                     }else if (serverMessage.startsWith("UFO_RUNNING")) {
                         String booleanValue = serverMessage.split(" ")[1];
+                        System.out.println("Valor recibido para UFO_RUNNING: " + booleanValue);
                         boolean isRunning = Boolean.parseBoolean(booleanValue);
                         UfoClient.this.isRunning = isRunning;
                     } else if (serverMessage.startsWith("UFO_STOPPED")) {
                         String booleanValue = serverMessage.split(" ")[1];
+                        System.out.println("Valor recibido para UFO_RUNNING: " + booleanValue); // Depuración
                         boolean isStopped = Boolean.parseBoolean(booleanValue);
                         UfoClient.this.allUfoStopped = isStopped; 
                     } else {
