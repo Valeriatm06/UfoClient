@@ -103,7 +103,6 @@ public class UfoAreaPanel extends JPanel {
 
     private void drawTrajectory(Graphics g, Ufo ufo) {
         List<Point> trajectory = ufo.getTrajectory();
-        System.out.println("TRAYECTORIA " + selectedUfoTrayectory);
         if (trajectory != null && !trajectory.isEmpty()) {
             g.setColor(GlobalView.TITLE_TEXT);
             for (int i = 0; i < trajectory.size() - 1; i++) {

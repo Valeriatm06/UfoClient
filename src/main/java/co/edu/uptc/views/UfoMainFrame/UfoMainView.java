@@ -132,12 +132,13 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
 
     @Override
     public void sendMessage(){
-        // if(!presenter.isFirstClient()){
-        //     mainPanel.getOptionsButton().setVisible(false);
-        // }
+        if(presenter.sendIsFirstClient()==false){
+            mainPanel.getOptionsButton().setVisible(false);
+        }
         presenter.sendUfoCount(ufoCount);
         presenter.sendSpeed(speed);
         presenter.sendAppearanceTime(appearanceTime);
+        presenter.sendUserName(initClientPanel.getUsernameTextField().getText());
     }
 
 
@@ -195,11 +196,6 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
         gamePanel.getInfoArea().upDateMovingUfoCount(0);
     }
 
-    // @Override
-    // public int getUfoNumber(){
-    //     return optionsDialog.getUfoCount();
-    // }
-
     @Override
     public void updateUfoDisplay(List<Ufo> ufos) {
         gamePanel.updateUfos(ufos);
@@ -233,20 +229,9 @@ public class UfoMainView extends JFrame implements UfoInterface.View{
         gamePanel.getUfoAreaPanel().repaint();
     }
 
-
-    // @Override
-    // public int[] areaSize() {
-    //    return gamePanel.getUfoArea();
-    // }
-
-    // @Override
-    // public int[] destinationAreaSize(){
-    //     return gamePanel.getDestinationArea();
-    // }
-    
-    // @Override
-    // public int[] ufoSize(){
-    //     return gamePanel.getUfoSize();
-    // }
+    @Override
+    public void updateUserNameList(List<String> userNameList) {
+        gamePanel.getInfoArea().updateUserList(userNameList);
+    }
     
 }

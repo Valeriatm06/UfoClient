@@ -45,11 +45,6 @@ public class MainPresenter implements UfoInterface.Presenter{
         model.sendAppearanceTime(appearanceTime);
     }
 
-    // @Override
-    // public int[] areaSize() {
-    //     return view.areaSize();
-    // }
-
     @Override
     public void startGame() {
        model.startGame();
@@ -85,24 +80,6 @@ public class MainPresenter implements UfoInterface.Presenter{
        view.updateMovingCount(movingNumber);
     }
 
-    // @Override
-    // public int[] destinationAreaSize() {
-    //     return view.destinationAreaSize();
-    // }
-
-    // @Override
-    // public int[] ufoSize() {
-    //     return view.ufoSize();
-    // }
-
-    // @Override
-    // public void updateSpeed(double newSpeed) {
-    //     if (model.getSelectedUfo() != null) {
-    //         model.getSelectedUfo().setSpeed(newSpeed);
-    //         view.refresh(); 
-    //     }
-    // }
-
     @Override
     public void sendSelectedUfoSpeed(int delta) {
         model.sendSelectedUfoSpeed(delta);
@@ -128,11 +105,6 @@ public class MainPresenter implements UfoInterface.Presenter{
         return model.selectUfoAtPosition();
     }
 
-    // @Override
-    // public void addTrajectoryPointToUfo(Ufo ufo, Point point) {
-    //         model.addTrajectoryPointToSelectedUfo(point);;
-    // }
-
     @Override
     public void startUfoMovement() {
         model.startUfoMovement();
@@ -149,17 +121,22 @@ public class MainPresenter implements UfoInterface.Presenter{
     }
 
     @Override
-    public boolean isFirstClient() {
-        return model.isFirstClient();
-    }
-
-    @Override
     public void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory) {
         model.sendSelectedUfoTrayectory(selectedUfoTrayectory);
     }
 
-    // @Override
-    // public int getUfoNumber() {
-    //     return view.getUfoNumber();
-    // }
+    @Override
+    public boolean sendIsFirstClient() {
+        return model.sendIsFirstClient();
+    }
+
+    @Override
+    public void sendUserName(String text) {
+        model.sendUserName(text);
+    }
+
+    @Override
+    public void updateUserNameList(List<String> userNameList) {
+        view.updateUserNameList(userNameList);
+    }
 }

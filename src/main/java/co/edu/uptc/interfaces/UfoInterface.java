@@ -34,11 +34,7 @@ public interface UfoInterface {
 
         public void changeSelectedUfoSpeed();
 
-        public boolean isFirstClient();
-
-        // public Ufo getSelectedUfo();
-
-        // public void addTrajectoryPointToSelectedUfo(Point point);
+        public boolean sendIsFirstClient();
 
         public void sendSelectedUfo(Ufo selectedUfo);
 
@@ -47,6 +43,8 @@ public interface UfoInterface {
         public boolean allUfosStopped();
 
         public void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory);
+
+        public void sendUserName(String text);
 
     }
 
@@ -63,13 +61,7 @@ public interface UfoInterface {
 
         public void sendAppearanceTime(int appearanceTime);
 
-        public boolean isFirstClient();
-
-        // public int[] areaSize();
-
-        // public int[] destinationAreaSize();
-
-        // public int[] ufoSize();
+        public boolean sendIsFirstClient();
 
         public void startGame();
 
@@ -85,8 +77,6 @@ public interface UfoInterface {
 
         public void countMovingUfos(int movingCount);
 
-        // public void updateSpeed(double newSpeed);
-
         public void sendXPosition(int x);
 
         public void sendYPosition(int y);
@@ -97,8 +87,6 @@ public interface UfoInterface {
 
         public void changeSelectedUfoSpeed();
 
-        // public void addTrajectoryPointToUfo(Ufo ufo, Point point);
-
         public void sendSelectedUfo(Ufo selectedUfo);
 
         public void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory);
@@ -107,7 +95,9 @@ public interface UfoInterface {
 
         public boolean allUfosStopped();
 
-        // public int getUfoNumber();
+        public void sendUserName(String text);
+
+        public void updateUserNameList(List<String> userNameList);
     }
 
     public interface View {
@@ -116,12 +106,6 @@ public interface UfoInterface {
         public void begin();
 
         public void sendMessage();
-
-        // public int[] areaSize();
-
-        // public int[] destinationAreaSize();
-
-        // public int[] ufoSize();
 
         public void updateUfoDisplay(List<Ufo> ufos);
 
@@ -133,7 +117,7 @@ public interface UfoInterface {
 
         public void refresh();
 
-        // public int getUfoNumber();
+        public void updateUserNameList(List<String> userNameList);
 
     }
 }

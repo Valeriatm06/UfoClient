@@ -2,7 +2,7 @@ package co.edu.uptc.views.UfoMainFrame;
 
 import javax.swing.*;
 import java.awt.*;
-
+import java.util.List;
 import co.edu.uptc.utilities.PropertiesService;
 import co.edu.uptc.views.GlobalView;
 import lombok.Getter;
@@ -18,6 +18,8 @@ public class GameInfoPanel extends JPanel {
     private JLabel ufoLabel;
     private JCheckBox showTrajectoryCheckBox;
     private int ufoType;
+    private JList<String> usersList;
+    private DefaultListModel<String> listModel; 
 
     public GameInfoPanel(UfoMainView ufoMainView) {
         this.ufoMainView = ufoMainView;
@@ -39,6 +41,7 @@ public class GameInfoPanel extends JPanel {
         initTrajectoryCheckbox(gbc);
         addHorizontalLine(gbc);
         initUfoStatus(gbc);
+        initScrollPane(gbc);
     }
 
     private void initTitle(GridBagConstraints gbc) {
@@ -154,6 +157,44 @@ public class GameInfoPanel extends JPanel {
         gbc.gridy++;
         add(arrivalUfoLabel, gbc);
     }
+
+    private void initScrollPane(GridBagConstraints gbc) {
+        listModel = new DefaultListModel<>();
+        usersList = new JList<>(listModel); 
+        usersList.setFont(GlobalView.ALL_TEXT_FONT);
+        usersList.setForeground(GlobalView.OPTIONS_BACKGROUND);
+        usersList.setBackground(Color.WHITE);
+        usersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(usersList);
+        scrollPane.setPreferredSize(new Dimension(250, 100));
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        add(scrollPane, gbc);
+    }
+
+    public void addUser(String userName) {
+        if (!listModel.contains(userName)) {
+            listModel.addElement(userName);
+        }
+    }
+
+    public void removeUser(String userName) {
+        listModel.removeElement(userName);
+    }
+
+    public void clearUsers() {
+        listModel.clear();
+    }
+
+    public void updateUserList(List<String> userList) {
+        clearUsers();
+        for (String user : userList) {
+            addUser(user);
+        }
+    }
+    
 
     private JLabel createStatusLabel(String text) {
         JLabel label = new JLabel(text);

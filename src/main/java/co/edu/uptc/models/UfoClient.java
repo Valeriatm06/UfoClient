@@ -25,7 +25,12 @@ public class UfoClient implements UfoInterface.Model {
     private boolean allUfoStopped;
     private Ufo ufoAtPosition;
     private List<Ufo> ufoList;
+    private List<String> usarNameList;
     private boolean isFirst;
+    private final Object isRunningLock = new Object();
+    private final Object isStoppedLock = new Object();
+    private final Object isFirstLock = new Object();
+    private final Object ufoListLock = new Object();
 
     @Override
     public void setPresenter(UfoInterface.Presenter presenter) {
@@ -54,6 +59,11 @@ public class UfoClient implements UfoInterface.Model {
     }
 
     @Override
+    public void sendUserName(String text) {
+        sendMessage("USER_NAME " + text);
+    }
+
+    @Override
     public void sendUfoCount(int ufoCount) {
         sendMessage("UFO_COUNT " + ufoCount);  
     }
@@ -79,8 +89,15 @@ public class UfoClient implements UfoInterface.Model {
     }
 
     @Override
-    public boolean isFirstClient() {
+    public boolean sendIsFirstClient() {
         sendMessage("IS_FIRST");
+        synchronized (isFirstLock) {
+            try {
+                isFirstLock.wait();
+         } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         return isFirst;
     }
 
@@ -101,44 +118,32 @@ public class UfoClient implements UfoInterface.Model {
     }
 
     @Override
-public void sendSelectedUfo(Ufo selectedUfo) {
-    try {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter()); 
-        Gson gson = gsonBuilder.create();
+    public void sendSelectedUfo(Ufo selectedUfo) {
+        try {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter()); 
+            Gson gson = gsonBuilder.create();
 
-        String ufoJson = gson.toJson(selectedUfo);
+            String ufoJson = gson.toJson(selectedUfo);
 
-        sendMessage("SELECTED_UFO " + ufoJson);
-    } catch (Exception e) {
-        e.printStackTrace();
+            sendMessage("SELECTED_UFO " + ufoJson);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-}
 
     @Override
-public synchronized void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory) {
-    try {
-        // Crear el objeto Gson y el adaptador para Point
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        // gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter()); 
-        Gson gson = gsonBuilder.create();
-
-        // Convertir la lista de trayectorias en una cadena JSON
-        String jsonTrayectory = gson.toJson(selectedUfoTrayectory);
-        
-        // Agregar la etiqueta "SELECTED_UFO_TRAYECTORY" y enviar el mensaje
-        String message = "SELECTED_UFO_TRAYECTORY " + jsonTrayectory;
-        
-        // Depuración: Imprimir el mensaje para asegurarnos de que se está enviando correctamente
-        System.out.println("Enviando mensaje al servidor: " + message);
-        
-        sendMessage("TRAYECTORY " + jsonTrayectory);
-    } catch (Exception e) {
-        e.printStackTrace();
+    public synchronized void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayectory) {
+        try {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            Gson gson = gsonBuilder.create();
+            String jsonTrayectory = gson.toJson(selectedUfoTrayectory);
+            sendMessage("TRAYECTORY " + jsonTrayectory);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-}
 
-    
 
 
     @Override
@@ -149,20 +154,46 @@ public synchronized void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayec
     @Override
     public boolean isRunning() {
         sendMessage("SEND_RUNNING_STATE");
-        return isRunning; 
+
+        synchronized (isRunningLock) {
+            try {
+                isRunningLock.wait();
+         } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return isRunning;
     }
+
 
     @Override
     public boolean allUfosStopped() {
         sendMessage("SEND_UFOS_STOPPED");
+        // synchronized (isStoppedLock) {
+        //     try {
+        //         isStoppedLock.wait();
+        //  } catch (InterruptedException e) {
+        //         e.printStackTrace();
+        //     }
+        // }
         return allUfoStopped;
     }
 
     @Override
     public List<Ufo> getUfosList() {
-        sendMessage("SEND_UFOS");
-        return ufoList;  
+        sendMessage("SEND_UFOS"); 
+
+        synchronized (ufoListLock) {
+            try {
+                ufoListLock.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return ufoList; 
     }
+
 
     @Override
     public void startGame() {
@@ -175,6 +206,35 @@ public synchronized void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayec
             writer.flush(); 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void receiveIsRuning(String booleanMessage) {
+        String booleanValue = booleanMessage.split(" ")[1];
+        boolean isRunning = Boolean.parseBoolean(booleanValue);
+        this.isRunning = isRunning;
+    
+        synchronized (isRunningLock) {
+            isRunningLock.notify(); 
+        }
+    }
+    
+
+    public void receiveIsStopped(String booleanMessage){
+        String booleanValue = booleanMessage.split(" ")[1];
+        boolean isStopped = Boolean.parseBoolean(booleanValue);
+        allUfoStopped = isStopped;
+        // synchronized (isStoppedLock) {
+        //     isStoppedLock.notify(); 
+        // }
+    }
+
+    public void receiveIsFirstClient(String booleanMessage){
+        String booleanValue = booleanMessage.split(" ")[1];
+        boolean isFirst = Boolean.parseBoolean(booleanValue);
+        this.isFirst = isFirst;
+        synchronized (isFirstLock) {
+            isFirstLock.notify(); 
         }
     }
 
@@ -195,19 +255,36 @@ public synchronized void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayec
             e.printStackTrace();
         }
     }
+
+    public void receiveUsersList(String jsonUserList) {
+        try {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<String>>() {}.getType();
+            usarNameList = gson.fromJson(jsonUserList, listType);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error al deserializar la lista de usuarios: " + jsonUserList);
+        }
+    }
     
-   public void receiveUfoList(String jsonUfoList) {
+    
+    public void receiveUfoList(String jsonUfoList) {
         try {
             GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter());  
+            gsonBuilder.registerTypeAdapter(Point.class, new PointAdapter());
             Gson gson = gsonBuilder.create();
-
+    
             Type listType = new TypeToken<List<Ufo>>() {}.getType();
             ufoList = gson.fromJson(jsonUfoList, listType);
+    
+            synchronized (ufoListLock) {
+                ufoListLock.notify(); 
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    
 
     private class ServerMessageHandler implements Runnable {
 
@@ -223,73 +300,73 @@ public synchronized void sendSelectedUfoTrayectory(List<Point> selectedUfoTrayec
         public void run() {
             try {
                 String serverMessage;
-                while ((serverMessage = reader.readUTF()) != null) {
-                    // System.out.println("Mensaje del servidor: " + serverMessage);
-                    
-                    if (serverMessage.startsWith("UFOS_LIST")) {
-                        String jsonUfoList = serverMessage.substring("UFOS_LIST".length()).trim();
-                        receiveUfoList(jsonUfoList);
-                    } else if (serverMessage.startsWith("UP_DATE_UFOS")) {
-                        String jsonUpdateList = serverMessage.substring("UP_DATE_UFOS".length()).trim();
-                        receiveUfoList(jsonUpdateList);
-                        presenter.updateUfos(ufoList);
-                    } else if (serverMessage.startsWith("SINGLE_UFO")) {
-                        String jsonUfo = serverMessage.substring("SINGLE_UFO".length()).trim();
-                        receiveSingleUfo(jsonUfo);
-                    } else if (serverMessage.startsWith("UFO_CRASHED_COUNT")) {
-                        try {
-                            int crashedCount = Integer.parseInt(serverMessage.split(" ")[1]);
-                            presenter.updateScore(crashedCount);
-                        } catch (NumberFormatException e) {
-                            System.err.println("Error al parsear el contador de UFOs estrellados: " + serverMessage.split(" ")[1]);
-                            e.printStackTrace();
+                while (true) {
+                    try {
+                        serverMessage = reader.readUTF();
+                        if (serverMessage != null) {
+                            processServerMessage(serverMessage);
                         }
-                    } else if (serverMessage.startsWith("UFO_ARRIVAL_COUNT")) {
-                        String[] parts = serverMessage.split(" ");
-                        if (parts.length > 1 && !parts[1].isEmpty()) {
-                            try {
-                                int arrivedCount = Integer.parseInt(parts[1]);
-                                presenter.updateArrival(arrivedCount);
-                            } catch (NumberFormatException e) {
-                                System.err.println("Error al parsear el contador de UFOs llegados: " + parts[1]);
-                                e.printStackTrace();
-                            }
-                        } else {
-                            System.err.println("Mensaje mal formado para UFO_ARRIVAL_COUNT: " + serverMessage);
-                        }
-                    } else if (serverMessage.startsWith("UFO_MOVING_COUNT")) {
-                        int movingCount = Integer.parseInt(serverMessage.split(" ")[1]);
-                        presenter.countMovingUfos(movingCount);
-                    } else if (serverMessage.startsWith("FIRST_CLIENT")) {
-                        String[] parts = serverMessage.split(" ");
-                        if (parts.length > 1) {
-                            String booleanValue = parts[1];
-                            System.out.println("Valor recibido para FIRST CLIENT: " + booleanValue);
-                            boolean isFirst = Boolean.parseBoolean(booleanValue);
-                            UfoClient.this.isFirst = isFirst;
-                        } else {
-                            System.err.println("Mensaje mal formado para UFO_RUNNING: " + serverMessage);
-                        }
-                    }else if (serverMessage.startsWith("UFO_RUNNING")) {
-                        String booleanValue = serverMessage.split(" ")[1];
-                        System.out.println("Valor recibido para UFO_RUNNING: " + booleanValue);
-                        boolean isRunning = Boolean.parseBoolean(booleanValue);
-                        UfoClient.this.isRunning = isRunning;
-                    } else if (serverMessage.startsWith("UFO_STOPPED")) {
-                        String booleanValue = serverMessage.split(" ")[1];
-                        System.out.println("Valor recibido para UFO_RUNNING: " + booleanValue); // Depuración
-                        boolean isStopped = Boolean.parseBoolean(booleanValue);
-                        UfoClient.this.allUfoStopped = isStopped; 
-                    } else {
-                        System.out.println("Comando desconocido: " + serverMessage);
+                    } catch (EOFException e) {
+                        System.err.println("Se alcanzó el final del flujo de entrada. Cerrando conexión...");
+                    } catch (IOException e) {
+                        System.err.println("Error al leer el mensaje del servidor: " + e.getMessage());
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-    }
     
+        private void processServerMessage(String serverMessage) {
+            if (serverMessage.startsWith("UFOS_LIST")) {
+                String jsonUfoList = serverMessage.substring("UFOS_LIST".length()).trim();
+                receiveUfoList(jsonUfoList);
+            } else if (serverMessage.startsWith("USERS_LIST")) {
+                String jsonUpdateList = serverMessage.substring("USERS_LIST".length()).trim();
+                receiveUsersList(jsonUpdateList);
+                presenter.updateUserNameList(usarNameList);
+            } else if (serverMessage.startsWith("UP_DATE_UFOS")) {
+                String jsonUpdateList = serverMessage.substring("UP_DATE_UFOS".length()).trim();
+                receiveUfoList(jsonUpdateList);
+                presenter.updateUfos(ufoList);
+            } else if (serverMessage.startsWith("SINGLE_UFO")) {
+                String jsonUfo = serverMessage.substring("SINGLE_UFO".length()).trim();
+                receiveSingleUfo(jsonUfo);
+            } else if (serverMessage.startsWith("UFO_CRASHED_COUNT")) {
+                try {
+                    int crashedCount = Integer.parseInt(serverMessage.split(" ")[1]);
+                    presenter.updateScore(crashedCount);
+                } catch (NumberFormatException e) {
+                    System.err.println("Error al parsear el contador de UFOs estrellados: " + serverMessage.split(" ")[1]);
+                    e.printStackTrace();
+                }
+            } else if (serverMessage.startsWith("UFO_ARRIVAL_COUNT")) {
+                String[] parts = serverMessage.split(" ");
+                if (parts.length > 1 && !parts[1].isEmpty()) {
+                    try {
+                        int arrivedCount = Integer.parseInt(parts[1]);
+                        presenter.updateArrival(arrivedCount);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error al parsear el contador de UFOs llegados: " + parts[1]);
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.err.println("Mensaje mal formado para UFO_ARRIVAL_COUNT: " + serverMessage);
+                }
+            } else if (serverMessage.startsWith("UFO_MOVING_COUNT")) {
+                int movingCount = Integer.parseInt(serverMessage.split(" ")[1]);
+                presenter.countMovingUfos(movingCount);
+            } else if (serverMessage.startsWith("FIRST_CLIENT")) {
+                receiveIsFirstClient(serverMessage);
+            } else if (serverMessage.startsWith("UFO_RUNNING")) {
+                receiveIsRuning(serverMessage);
+            } else if (serverMessage.startsWith("UFO_STOPPED")) {
+                receiveIsStopped(serverMessage);
+            } else {
+                System.out.println("Comando desconocido: " + serverMessage);
+            }
+        }
+    }
 
 }
 

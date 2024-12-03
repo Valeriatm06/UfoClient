@@ -101,6 +101,7 @@ public class GamePanel extends JPanel {
     public void updateUfos(List<Ufo> ufos) {
         ufoAreaPanel.setUfos(ufos); 
         ufoAreaPanel.repaint(); 
+        ufoMainView.getPresenter().sendUserName(ufoMainView.getInitClientPanel().getUsernameTextField().getText());
     }
       
 }
