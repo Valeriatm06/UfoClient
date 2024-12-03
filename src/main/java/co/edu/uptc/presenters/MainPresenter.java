@@ -139,4 +139,9 @@ public class MainPresenter implements UfoInterface.Presenter{
     public void updateUserNameList(List<String> userNameList) {
         view.updateUserNameList(userNameList);
     }
+
+    @Override
+    public void closeEverything() {
+        view.exitGame();
+    }
 }

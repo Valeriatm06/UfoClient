@@ -41,6 +41,8 @@ public class GameInfoPanel extends JPanel {
         initTrajectoryCheckbox(gbc);
         addHorizontalLine(gbc);
         initUfoStatus(gbc);
+        addHorizontalLine(gbc);
+        initTitleUsers(gbc);
         initScrollPane(gbc);
     }
 
@@ -158,21 +160,41 @@ public class GameInfoPanel extends JPanel {
         add(arrivalUfoLabel, gbc);
     }
 
+    private void initTitleUsers(GridBagConstraints gbc) {
+        JLabel titleLabel = new JLabel("Usuarios");
+        titleLabel.setFont(GlobalView.TITLE_FONT_SMALL);
+        titleLabel.setForeground(GlobalView.TITLE_TEXT);
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL; 
+        gbc.anchor = GridBagConstraints.CENTER;
+        add(titleLabel, gbc);
+    }
+
     private void initScrollPane(GridBagConstraints gbc) {
-        listModel = new DefaultListModel<>();
-        usersList = new JList<>(listModel); 
-        usersList.setFont(GlobalView.ALL_TEXT_FONT);
-        usersList.setForeground(GlobalView.OPTIONS_BACKGROUND);
-        usersList.setBackground(Color.WHITE);
-        usersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        usersList = createUserList();
         JScrollPane scrollPane = new JScrollPane(usersList);
         scrollPane.setPreferredSize(new Dimension(250, 100));
+        scrollPane.setBorder(null);
+        
         gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         add(scrollPane, gbc);
     }
+    
+    private JList<String> createUserList() {
+        listModel = new DefaultListModel<>();
+        JList<String> list = new JList<>(listModel);
+        list.setFont(GlobalView.ALL_TEXT_FONT);
+        list.setForeground(GlobalView.TITLE_TEXT);
+        list.setBackground(GlobalView.OPTIONS_BACKGROUND);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        return list;
+    }
+    
 
     public void addUser(String userName) {
         if (!listModel.contains(userName)) {
@@ -189,11 +211,16 @@ public class GameInfoPanel extends JPanel {
     }
 
     public void updateUserList(List<String> userList) {
+        if (userList == null || userList.isEmpty()) {
+            System.out.println("La lista de usuarios está vacía.");
+            return;
+        }
         clearUsers();
         for (String user : userList) {
             addUser(user);
         }
     }
+    
     
 
     private JLabel createStatusLabel(String text) {

@@ -98,6 +98,8 @@ public interface UfoInterface {
         public void sendUserName(String text);
 
         public void updateUserNameList(List<String> userNameList);
+
+        public void closeEverything();
     }
 
     public interface View {
@@ -118,6 +120,8 @@ public interface UfoInterface {
         public void refresh();
 
         public void updateUserNameList(List<String> userNameList);
+
+        public void exitGame();
 
     }
 }
